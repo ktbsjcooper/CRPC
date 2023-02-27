@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment
+  labels:
+    app: crpcserver
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: crpcserver
+  template:
+    metadata:
+      labels:
+        app: crpcserver
+    spec:
+      containers:
+      - name: crpcserver
+        image: crpcserver:latest
+        ports:
+        - containerPort: 50000
