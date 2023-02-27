@@ -18,6 +18,7 @@ namespace CRPC.Client
         {
             IConfiguration config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
+                .AddEnvironmentVariables()
                 .Build();
 
             var serverHostname = config.GetValue<string>("GrpcServer:Hostname");

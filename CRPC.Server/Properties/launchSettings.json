@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CRPC.Server": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

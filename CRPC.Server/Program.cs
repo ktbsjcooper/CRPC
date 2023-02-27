@@ -17,6 +17,7 @@ namespace CRPC.Server
         {
             IConfiguration config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
+                .AddEnvironmentVariables()
                 .Build();
 
             ServerCredentials serverCredentials = ServerCredentials.Insecure; ;
