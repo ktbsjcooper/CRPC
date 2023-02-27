@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: crpcserver
-        image: crpcserver
+        image: CRPCServer20230224113801.azurecr.io/crpcserver:${{ github.sha }}
         ports:
         - containerPort: 50000
