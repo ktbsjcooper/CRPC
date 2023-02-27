@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment
+  name: crpcserver
   labels:
     app: crpcserver
 spec:
@@ -19,3 +19,13 @@ spec:
         image: CRPCServer20230224113801.azurecr.io/crpcserver:${{ github.sha }}
         ports:
         - containerPort: 50000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crpcserver
+spec:
+  ports:
+  - port: 50000
+  selector:
+    app: crpcserver
