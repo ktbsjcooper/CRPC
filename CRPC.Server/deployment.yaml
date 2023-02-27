@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: crpcserver
-        image: crpcserver:latest
+        image: crpcserver
         ports:
         - containerPort: 50000
