@@ -11,7 +11,7 @@ env:
     CLUSTER_RESOURCE_GROUP: DevOps-CRPC-Server-RG
     CONTAINER_NAME: crpcserver
     DEPLOYMENT_MANIFEST_PATH: |
-        ./CRPC.Server/deployment.yaml
+        ./CRPC.Server/manifests
 jobs:
     buildImage:
         permissions:

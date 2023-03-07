@@ -1,4 +1,6 @@
-﻿using Grpc.Core;
+﻿using CRPC.Common;
+using Grpc.Core;
+using Grpc.Core.Logging;
 using Microsoft.Extensions.Configuration;
 using ProtoBuf.Grpc.Client;
 using static CRPC.Common.Contracts;
@@ -24,18 +26,23 @@ namespace CRPC.Client
             var serverHostname = config.GetValue<string>("GrpcServer:Hostname");
             var serverPort = config.GetValue<int>("GrpcServer:Port");
 
-            ChannelCredentials channelCredentials = ChannelCredentials.Insecure;
-            var certPath = config.GetValue<string>("GrpcServer:CertificatePath");
-            if (File.Exists(certPath))
-            {
-                channelCredentials = new SslCredentials(File.ReadAllText(certPath));
-            }
-
             var channelOptions = new ChannelOption[] {
                 new ChannelOption(ChannelOptions.MaxReceiveMessageLength, MAX_LENGTH),
                 new ChannelOption(ChannelOptions.MaxSendMessageLength, MAX_LENGTH),
                 new ChannelOption(ChannelOptions.MaxConcurrentStreams, int.MaxValue)
             };
+
+            ChannelCredentials channelCredentials;
+            var certPath = config.GetValue<string>("GrpcServer:CertificatePath");
+            if (File.Exists(certPath))
+            {
+                channelCredentials = new SslCredentials(File.ReadAllText(certPath));
+            }
+            else
+            {
+                channelCredentials = new SslCredentials(SslDefault.Certificate);
+                channelOptions = channelOptions.Append(new ChannelOption(ChannelOptions.SslTargetNameOverride, SslDefault.Hostname)).ToArray();
+            }
 
             var channel = new Channel(serverHostname, serverPort, channelCredentials, channelOptions);
             var dataService = channel.CreateGrpcService<IDataService>();

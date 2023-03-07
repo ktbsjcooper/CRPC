@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using CRPC.Common;
+using Grpc.Core;
 using Microsoft.Extensions.Configuration;
 using ProtoBuf.Grpc.Server;
 
@@ -20,7 +21,14 @@ namespace CRPC.Server
                 .AddEnvironmentVariables()
                 .Build();
 
-            ServerCredentials serverCredentials = ServerCredentials.Insecure; ;
+            var channelOptions = new ChannelOption[] {
+                new ChannelOption(ChannelOptions.SoReuseport, 0),
+                new ChannelOption(ChannelOptions.MaxReceiveMessageLength, MAX_LENGTH),
+                new ChannelOption(ChannelOptions.MaxSendMessageLength, MAX_LENGTH),
+                new ChannelOption(ChannelOptions.MaxConcurrentStreams, int.MaxValue)
+            };
+
+            ServerCredentials serverCredentials;
             var certPath = config.GetValue<string>("GrpcServer:CertificatePath");
             var certKeyPath = config.GetValue<string>("GrpcServer:CertificateKeyPath");
             if (File.Exists(certPath) && File.Exists(certKeyPath))
@@ -31,13 +39,15 @@ namespace CRPC.Server
                 };
                 serverCredentials = new SslServerCredentials(certs);
             }
-
-            var channelOptions = new ChannelOption[] {
-                new ChannelOption(ChannelOptions.SoReuseport, 0),
-                new ChannelOption(ChannelOptions.MaxReceiveMessageLength, MAX_LENGTH),
-                new ChannelOption(ChannelOptions.MaxSendMessageLength, MAX_LENGTH),
-                new ChannelOption(ChannelOptions.MaxConcurrentStreams, int.MaxValue)
-            };
+            else
+            {
+                var certs = new List<KeyCertificatePair>
+                {
+                    new KeyCertificatePair(SslDefault.Certificate, SslDefault.Key)
+                };
+                serverCredentials = new SslServerCredentials(certs);
+                channelOptions = channelOptions.Append(new ChannelOption(ChannelOptions.SslTargetNameOverride, SslDefault.Hostname)).ToArray();
+            }
 
             var server = new Grpc.Core.Server(channelOptions)
             {
