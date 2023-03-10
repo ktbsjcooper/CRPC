@@ -51,17 +51,23 @@ namespace CRPC.Client
             var dataSize = config.GetValue<int>("DataService:Size");
             while (true)
             {
-                Console.Write($"Waiting for {parallelCount} requests at size {dataSize}... ");
+                Console.WriteLine($"Waiting for {parallelCount} requests at size {dataSize}...");
+                var senders = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
+
                 var tasks = Enumerable.Range(0, parallelCount).AsParallel().Select(async t =>
                 {
+                    
                     var response = await dataService.GetCustomDataAsync(new CustomSizeDataRequest() { Size = dataSize });
                     if (response.Data?.Length != dataSize)
                     {
                         throw new ApplicationException($"Data size mismatch. Got {response.Data?.Length} Expected {dataSize}");
                     }
+
+                    senders.AddOrUpdate(response.Sender ?? "UNKNOWN", 1, (k, v) => v + 1);
                 });
                 await Task.WhenAll(tasks);
-                Console.WriteLine("Done.");
+
+                Console.WriteLine(string.Join(Environment.NewLine, senders.Select(x => $"[{x.Key}]: {x.Value} ")));
             }
         }
     }
